@@ -1,0 +1,15 @@
+@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@100;200&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* COMPONENT LEVEL */
+
+.scrollbar::-webkit-scrollbar-track {
+  width: 5px;
+}
+
+/* OVERRIDES */
+.ReactVirtualized__Table__headerColumn {
+  margin-right: 0 !important;
+}

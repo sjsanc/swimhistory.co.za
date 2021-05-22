@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model coaches {
+  id          Int        @id @default(autoincrement()) @db.UnsignedInt
+  first_name  String     @db.VarChar(30)
+  last_name   String     @db.VarChar(30)
+  dob         DateTime?  @db.Date
+  birth_city  String?    @db.VarChar(50)
+  nationality String?    @db.VarChar(50)
+  swimmers    swimmers[]
+}
+
+model competitions {
+  id               Int             @id @default(autoincrement()) @db.UnsignedInt
+  name             String          @db.VarChar(255)
+  pool_id          Int             @db.UnsignedInt
+  start_date       DateTime        @db.Date
+  finish_date      DateTime?       @db.Date
+  swimming_type_id Int?            @db.UnsignedInt
+  pools            pools           @relation(fields: [pool_id], references: [id])
+  swimming_types   swimming_types? @relation(fields: [swimming_type_id], references: [id])
+  series           series[]
+
+  @@index([pool_id], name: "fk_pool")
+  @@index([swimming_type_id], name: "fk_swimming_type")
+}
+
+model genders {
+  id     Int      @id @default(autoincrement()) @db.UnsignedInt
+  gender String   @db.VarChar(30)
+  series series[]
+}
+
+model heats {
+  id        Int       @id @default(autoincrement()) @db.UnsignedInt
+  series_id Int       @db.UnsignedInt
+  day_held  DateTime? @db.Date
+  is_final  Boolean?  @default(dbgenerated("(b'0')")) @db.Bit(1)
+  series    series    @relation(fields: [series_id], references: [id])
+  times     times[]
+
+  @@index([series_id], name: "fk_series")
+}
+
+model pools {
+  id             Int            @id @default(autoincrement()) @db.UnsignedInt
+  name           String         @db.VarChar(255)
+  city           String         @db.VarChar(255)
+  country        String         @db.VarChar(255)
+  current_status String?        @db.VarChar(255)
+  coords         String?        @db.VarChar(255)
+  competitions   competitions[]
+}
+
+model provinces {
+  id      Int       @id @default(autoincrement()) @db.UnsignedInt
+  name    String    @db.VarChar(30)
+  schools schools[]
+}
+
+model schools {
+  id          Int        @id @default(autoincrement()) @db.UnsignedInt
+  name        String     @db.VarChar(255)
+  province_id Int?       @db.UnsignedInt
+  provinces   provinces? @relation(fields: [province_id], references: [id])
+  swimmers    swimmers[]
+
+  @@index([province_id], name: "fk_province")
+}
+
+model series {
+  id             Int          @id @default(autoincrement()) @db.UnsignedInt
+  name           String?      @db.VarChar(255)
+  distance       Int
+  gender_id      Int          @db.UnsignedInt
+  style_id       Int          @db.UnsignedInt
+  competition_id Int          @db.UnsignedInt
+  competitions   competitions @relation(fields: [competition_id], references: [id])
+  genders        genders      @relation(fields: [gender_id], references: [id])
+  styles         styles       @relation(fields: [style_id], references: [id])
+  heats          heats[]
+
+  @@index([competition_id], name: "fk_competition")
+  @@index([gender_id], name: "fk_gender")
+  @@index([style_id], name: "fk_style")
+}
+
+model styles {
+  id     Int      @id @default(autoincrement()) @db.UnsignedInt
+  name   String?  @db.VarChar(30)
+  series series[]
+}
+
+model swimmers {
+  id          Int       @id @default(autoincrement()) @db.UnsignedInt
+  first_name  String    @db.VarChar(50)
+  last_name   String    @db.VarChar(50)
+  dob         DateTime? @db.Date
+  birth_city  String?   @db.VarChar(50)
+  school_id   Int?      @db.UnsignedInt
+  nationality String?   @db.VarChar(50)
+  coach_id    Int?      @db.UnsignedInt
+  sbk_colors  Boolean?  @default(dbgenerated("(b'0')")) @db.Bit(1)
+  coaches     coaches?  @relation(fields: [coach_id], references: [id])
+  schools     schools?  @relation(fields: [school_id], references: [id])
+  times       times[]
+
+  @@index([coach_id], name: "fk_coach")
+  @@index([school_id], name: "fk_school")
+}
+
+model times {
+  id         Int      @id @default(autoincrement()) @db.UnsignedInt
+  heat_id    Int      @db.UnsignedInt
+  duration   DateTime @db.Time(0)
+  swimmer_id Int      @db.UnsignedInt
+  heats      heats    @relation(fields: [heat_id], references: [id])
+  swimmers   swimmers @relation(fields: [swimmer_id], references: [id])
+
+  @@index([heat_id], name: "fk_heat")
+  @@index([swimmer_id], name: "fk_swimmer")
+}
+
+model swimming_types {
+  id           Int            @id @default(autoincrement()) @db.UnsignedInt
+  name         String?        @db.VarChar(30)
+  competitions competitions[]
+}
