@@ -8,7 +8,7 @@ import * as Util from "../utils/utils";
 
 // DB
 import { Prisma, swimming_types, swimmers } from ".prisma/client";
-import { DBTypeJSON } from "../types";
+import { DBTypeJSON, RowClickEvent } from "../types";
 
 // ASSETS
 import DatabaseIcon from "../assets/site_images/database_icon.svg";

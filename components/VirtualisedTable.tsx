@@ -15,6 +15,9 @@ import {
   TableCellRenderer,
   TableHeaderProps,
 } from "react-virtualized";
+import { RowClickEvent } from "../types";
+import { rowDataState } from "../atoms/atoms";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 
 declare module "@material-ui/core/styles/withStyles" {
   // Augment the BaseCSSProperties so that we can control jss-rtl
@@ -45,10 +48,11 @@ const styles = (theme: Theme) =>
     },
     tableRow: {
       cursor: "pointer",
+      // border: "1px solid transparent",
     },
     tableRowHover: {
       "&:hover": {
-        backgroundColor: theme.palette.grey[200],
+        backgroundColor: "#e3f3ff",
       },
     },
     tableCell: {
@@ -79,7 +83,7 @@ interface Row {
 interface MuiVirtualizedTableProps extends WithStyles<typeof styles> {
   columns: ColumnData[];
   headerHeight?: number;
-  onRowClick?: () => void;
+  onRowClick?: (e: RowClickEvent) => void;
   rowCount: number;
   rowGetter: (row: Row) => any;
   rowHeight?: number;
@@ -95,7 +99,7 @@ class MuiVirtualizedTable extends React.PureComponent<MuiVirtualizedTableProps> 
     const { classes, onRowClick } = this.props;
 
     return clsx(classes.tableRow, classes.flexContainer, {
-      [classes.tableRowHover]: index !== -1 && onRowClick != null,
+      [classes.tableRowHover]: index != -1 && onRowClick == null,
     });
   };
 
@@ -143,8 +147,14 @@ class MuiVirtualizedTable extends React.PureComponent<MuiVirtualizedTableProps> 
   };
 
   render() {
-    const { classes, columns, rowHeight, headerHeight, ...tableProps } =
-      this.props;
+    const {
+      classes,
+      columns,
+      rowHeight,
+      onRowClick,
+      headerHeight,
+      ...tableProps
+    } = this.props;
     return (
       <AutoSizer>
         {({ height, width }) => (
@@ -156,8 +166,9 @@ class MuiVirtualizedTable extends React.PureComponent<MuiVirtualizedTableProps> 
               direction: "inherit",
             }}
             headerHeight={headerHeight!}
-            className={clsx(classes.table, classes.scrollbar)}
+            className={clsx(classes.table)}
             {...tableProps}
+            onRowClick={(e) => onRowClick(e)}
             rowClassName={this.getRowClassName}>
             {columns.map(({ dataKey, ...other }, index) => {
               return (
@@ -186,6 +197,22 @@ class MuiVirtualizedTable extends React.PureComponent<MuiVirtualizedTableProps> 
 const VirtualizedTable = withStyles(styles)(MuiVirtualizedTable);
 
 export default function ReactVirtualizedTable({ cols, rows }) {
+  const setRowDataState = useSetRecoilState(rowDataState);
+  const [highlightedRow, setHighlightedRow] = useState<HTMLElement>(null);
+
+  const onRowClick = (e: RowClickEvent) => {
+    const rowElement = e.event.target.parentNode.parentNode;
+
+    if (highlightedRow !== null) {
+      highlightedRow.classList.remove("table-row-selected");
+    }
+
+    setRowDataState(e.rowData);
+    setHighlightedRow(rowElement);
+
+    rowElement.classList.add("table-row-selected");
+  };
+
   const hydrateColumns = (cols): ColumnData[] => {
     const maxWidth = 1100 - 40;
 
@@ -198,12 +225,11 @@ export default function ReactVirtualizedTable({ cols, rows }) {
   };
 
   return (
-    // <Paper style={{ height: 400, width: 1100 }}>
     <VirtualizedTable
       rowCount={rows.length}
       rowGetter={({ index }) => rows[index]}
       columns={hydrateColumns(cols)}
+      onRowClick={onRowClick}
     />
-    // </Paper>
   );
 }

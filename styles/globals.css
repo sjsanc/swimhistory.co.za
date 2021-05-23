@@ -9,6 +9,12 @@
   width: 5px;
 }
 
+/*  */
+.table-row-selected {
+  background-color: #deeeff;
+}
+
+/* TOAST */
 .toast-wrapper {
   position: fixed;
   top: 0;

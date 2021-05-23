@@ -1,19 +1,39 @@
-import React, { useState } from "react";
+import { Prisma } from ".prisma/client";
+import React, { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { useSetRecoilState } from "recoil";
-import { toastState } from "../atoms/atoms";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import { rowDataState, toastState } from "../atoms/atoms";
 import { cleanTypeLabel } from "../utils/utils";
 
 export default function DatabaseRecordForm({ table, model, types }) {
-  const [postOutcome, setPostOutcome] = useState<boolean>(false);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
+  const [updatingRecord, setUpdatingRecord] = useState<boolean>(false);
+
+  // RECOIL
   const setToastState = useSetRecoilState(toastState);
+  const selectedRowData = useRecoilValue(rowDataState);
 
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<any>();
+
+  const populateForm = (rowData) => {
+    Object.entries(rowData).forEach((key, val) => {
+      setValue(key[0], key[1]);
+    });
+  };
+
+  useEffect(() => {
+    if (isMounted) {
+      setUpdatingRecord(true);
+      populateForm(selectedRowData);
+    }
+    setIsMounted(true);
+  }, [selectedRowData]);
 
   const postRecord = async (data) => {
     data["table"] = table;
@@ -45,6 +65,13 @@ export default function DatabaseRecordForm({ table, model, types }) {
     <form
       onSubmit={handleSubmit(onSubmit)}
       className="p-3 border-t border-gray-300">
+      {updatingRecord && (
+        <div
+          className="flex items-center justify-center w-100
+        border border-yellow-300 rounded bg-yellow-100 text-yellow-600 text-xs font-bold mb-3 p-1">
+          UPDATING RECORD ID: {selectedRowData["id"]}
+        </div>
+      )}
       {model
         ? model
             .filter((w) => w !== "id")
@@ -71,11 +98,19 @@ export default function DatabaseRecordForm({ table, model, types }) {
             ))
         : null}
       <div className="w-100 flex justify-end">
-        <input
-          type="submit"
-          value="SUBMIT"
-          className="px-2 py-1 rounded text-sm font-bold text-gray-400 hover:text-blue-500 cursor-pointer"
-        />
+        {updatingRecord ? (
+          <input
+            type="submit"
+            value="UPDATE RECORD"
+            className="px-2 py-1 rounded text-sm font-bold border-blue-400 border bg-white text-blue-400 hover:text-blue-600 cursor-pointer"
+          />
+        ) : (
+          <input
+            type="submit"
+            value="SUBMIT"
+            className="px-2 py-1 rounded text-sm font-bold border-blue-400 border bg-white text-blue-400 hover:text-blue-600 cursor-pointer"
+          />
+        )}
       </div>
     </form>
   );

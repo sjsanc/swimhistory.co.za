@@ -8,3 +8,8 @@ export const toastState = atom<ToastType>({
     color: "",
   },
 });
+
+export const rowDataState = atom<any>({
+  key: "selectedRowData",
+  default: {},
+});
