@@ -3,3 +3,8 @@ export type DBTypeJSON = {
   Column_Name: string;
   Data_Type: string;
 };
+
+export type ToastType = {
+  text: string;
+  color: string;
+};

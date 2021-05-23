@@ -22,8 +22,10 @@
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
     "react-hook-form": "^7.6.0",
+    "react-loader-spinner": "^4.0.0",
     "react-markdown": "^5.0.0",
-    "react-virtualized": "^9.22.3"
+    "react-virtualized": "^9.22.3",
+    "recoil": "^0.3.1"
   },
   "devDependencies": {
     "@types/node": "13.13.52",

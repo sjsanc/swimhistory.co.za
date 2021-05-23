@@ -1,42 +1,54 @@
+// BASE
 import React, { useEffect, useState } from "react";
 import { GetServerSideProps } from "next";
-import Layout from "../components/Layout";
+
+// UTILS
 import * as _ from "lodash";
-import VirtualisedTable from "../components/VirtualisedTable";
-import { extractTypes, getColumns, getRows } from "../utils/utils";
+import * as Util from "../utils/utils";
+
+// DB
 import { Prisma, swimming_types, swimmers } from ".prisma/client";
-import DatabaseRecordForm from "../components/DatabaseRecordForm";
 import { DBTypeJSON } from "../types";
+
+// ASSETS
 import DatabaseIcon from "../assets/site_images/database_icon.svg";
 
+// COMPONENTS
+import Layout from "../components/Layout";
+import DatabaseRecordForm from "../components/DatabaseRecordForm";
+import VirtualisedTable from "../components/VirtualisedTable";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+
+// RECOIL
+import { toastState } from "../atoms/atoms";
+
 const Home: React.FC<any> = (props) => {
-  const [dbStatus, setDbStatus] = useState<boolean>(false);
+  const [dbStatus, setDbStatus] = useState<boolean>(false); // for pinging
   const [currentTableData, setCurrentTableData] = useState<any[]>();
   const [currentTableName, setCurrentTableName] = useState<string>();
   const [currentTableTypes, setCurrentTableTypes] = useState<DBTypeJSON[]>();
-
-  const VARS = {
-    IP: "http://localhost",
-    PORT: 3000,
-  }; // this stuff is fine anyway
 
   // For building the Virtualized Table
   const [columns, setColumns] = useState<string[]>([]);
   const [rows, setRows] = useState();
 
+  // Recoil handlers
+  const setToastState = useSetRecoilState(toastState);
+
+  // Not-so-secret secrets
+  const VARS = {
+    IP: "http://localhost",
+    PORT: 3000,
+  };
+
+  // Get DB status
   useEffect(() => {
-    pingDb();
+    Util.pingDb(setDbStatus);
     const interval = setInterval(() => {
-      pingDb();
+      Util.pingDb(setDbStatus);
     }, 10000);
     return () => clearInterval(interval);
   }, []);
-
-  const pingDb = async () => {
-    await fetch(`http://localhost:3000/api/ping`).then((res) =>
-      res.status == 200 ? setDbStatus(true) : setDbStatus(false)
-    );
-  };
 
   const fetchTableData = async (e: any) => {
     const table = e.target.innerText.toLowerCase();
@@ -47,10 +59,13 @@ const Home: React.FC<any> = (props) => {
           setRows(data);
           setCurrentTableData(data);
           setCurrentTableName(table);
-          setColumns(getColumns(data[0]));
-          setCurrentTableTypes(extractTypes(props.typesData, table));
+          setColumns(Util.getColumns(data[0]));
+          setCurrentTableTypes(Util.extractTypes(props.typesData, table));
         } else {
-          console.log("No table data found");
+          setToastState({
+            color: "failure",
+            text: `Unable to fetch data for ${table}`,
+          });
         }
       });
   };

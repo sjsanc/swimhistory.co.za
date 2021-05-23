@@ -9,6 +9,48 @@
   width: 5px;
 }
 
+.toast-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  pointer-events: none;
+}
+.toast-inner-wrapper {
+  position: absolute;
+  bottom: 0;
+  height: 200px;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.toast {
+  padding: 0 15px;
+  min-width: 100px;
+  min-height: 50px;
+  bottom: 30px;
+  opacity: 0;
+  transition: 0.2s ease-in-out;
+}
+.toast-visible {
+  bottom: 60px;
+  opacity: 100%;
+  transition: 0.2s ease-in-out;
+}
+.toast-success {
+  background: rgb(90, 209, 90);
+  box-shadow: 0 0 5px rgb(87, 255, 87);
+  color: white;
+}
+.toast-failure {
+  background: rgb(255, 60, 60);
+  box-shadow: 0 0 5px rgb(247, 71, 71);
+  color: white;
+}
+
 /* OVERRIDES */
 .ReactVirtualized__Table__headerColumn {
   margin-right: 0 !important;

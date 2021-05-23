@@ -1,13 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { useSetRecoilState } from "recoil";
+import { toastState } from "../atoms/atoms";
 import { cleanTypeLabel } from "../utils/utils";
 
-type Inputs = {
-  example: string;
-  exampleRequired: string;
-};
-
 export default function DatabaseRecordForm({ table, model, types }) {
+  const [postOutcome, setPostOutcome] = useState<boolean>(false);
+  const setToastState = useSetRecoilState(toastState);
+
   const {
     register,
     handleSubmit,
@@ -20,15 +20,24 @@ export default function DatabaseRecordForm({ table, model, types }) {
     const post = await fetch("http://localhost:3000/api/maindb/postRecord", {
       method: "POST",
       body: JSON.stringify(data),
-    }).then((res) => console.log(res));
-    //   .then((data) => {
-    //     console.log(data);
-    //   });
+    }).then((res) => {
+      if (res.status == 200) {
+        setToastState({
+          color: "success",
+          text: "Record post successful",
+        });
+      } else {
+        setToastState({
+          color: "failure",
+          text: "Record post failed",
+        });
+      }
+    });
   };
 
-
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
-    console.log("Submitted");
+  const onSubmit: SubmitHandler<any> = (data) => {
+    console.log("Record submitted...");
+    data["types"] = types; // attach the type data JSON
     postRecord(data);
   };
 

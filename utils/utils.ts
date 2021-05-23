@@ -21,3 +21,9 @@ export const cleanTypeLabel = (typeLabel: string): string => {
     .replace("int", "numeric")
     .replace("bit", "boolean");
 };
+
+export const pingDb = async (setter) => {
+  await fetch(`http://localhost:3000/api/ping`).then((res) =>
+    res.status == 200 ? setter(true) : setter(false)
+  );
+};
