@@ -14,6 +14,10 @@
   background-color: #deeeff;
 }
 
+.small-icon {
+  height: 22px;
+}
+
 /* TOAST */
 .toast-wrapper {
   position: fixed;

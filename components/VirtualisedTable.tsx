@@ -198,7 +198,16 @@ const VirtualizedTable = withStyles(styles)(MuiVirtualizedTable);
 
 export default function ReactVirtualizedTable({ cols, rows }) {
   const setRowDataState = useSetRecoilState(rowDataState);
+  const selectedRowData = useRecoilValue(rowDataState);
   const [highlightedRow, setHighlightedRow] = useState<HTMLElement>(null);
+
+  useEffect(() => {
+    // Deselect row when clearing form
+    if (Object.keys(selectedRowData).length == 0 && highlightedRow != null) {
+      highlightedRow.classList.remove("table-row-selected");
+      setHighlightedRow(null);
+    }
+  }, [selectedRowData]);
 
   const onRowClick = (e: RowClickEvent) => {
     const rowElement = e.event.target.parentNode.parentNode;
